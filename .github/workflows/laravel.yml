@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 
 jobs:
@@ -52,3 +52,18 @@ jobs:
       run: |
         php artisan migrate
         vendor/bin/phpunit
+
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        env:
+          HOST_NAME: ${{ secrets.HOST_NAME }}
+          USER_NAME: ${{ secrets.USER_NAME }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} 'cd /var/www'
