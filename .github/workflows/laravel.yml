@@ -49,4 +49,6 @@ jobs:
         DB_DATABASE: homestead
         DB_USERNAME: homestead
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      run: vendor/bin/phpunit
+      run: |
+        php artisan migrate
+        vendor/bin/phpunit
