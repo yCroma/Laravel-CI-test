@@ -6,6 +6,22 @@ on:
   pull_request:
     branches: [ master ]
 
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    env:
+      MYSQL_DATABASE: homestead
+      MYSQL_USER: homestead
+      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    options: >-
+      --health-cmd="mysqladmin ping"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=3
+
 jobs:
   laravel-tests:
 
@@ -27,6 +43,10 @@ jobs:
         touch database/database.sqlite
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       env:
-        DB_CONNECTION: sqlite
-        DB_DATABASE: database/database.sqlite
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: homestead
+        DB_USERNAME: homestead
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: vendor/bin/phpunit
